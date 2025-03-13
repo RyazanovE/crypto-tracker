@@ -1,5 +1,6 @@
 import { Portfolio } from 'src/portfolio/entities/portfolio.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne, UpdateDateColumn, CreateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne, UpdateDateColumn, CreateDateColumn, BeforeInsert } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Entity()
 export class User {
@@ -20,4 +21,9 @@ export class User {
 
   @OneToOne(() => Portfolio, (portfolio) => portfolio.user, { cascade: true })
   portfolio: Portfolio 
+
+  @BeforeInsert()
+  async hashPassword() {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
 }

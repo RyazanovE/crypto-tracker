@@ -1,9 +1,9 @@
-import { pgConfig } from 'src/../dbConfig';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { SeederOptions, runSeeders } from 'typeorm-extension';
+import dbConfig from 'src/config/db.config';
 
 const options: DataSourceOptions  & SeederOptions = {
-  ...pgConfig,
+  ...dbConfig(),
   factories: ['src/seeding/factories/**/*.factory{.ts,.js}'],
   seeds: ['src/seeding/seeds/**/*.seeder{.ts,.js}']
 }

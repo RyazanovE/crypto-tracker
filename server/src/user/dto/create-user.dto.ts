@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { IsString, Length } from 'class-validator';
+import { IsEmail, IsString, Length } from 'class-validator';
 
 export const CreateUserSchema = z
   .object({
@@ -11,7 +11,7 @@ export const CreateUserSchema = z
 
 export class CreateUserDto {
   @IsString()
-  @Length(6, undefined, { message: 'error on length' })
+  @IsEmail()
   email: string;
 
   @IsString()
