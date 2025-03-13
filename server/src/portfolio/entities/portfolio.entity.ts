@@ -1,6 +1,5 @@
 import { PortfolioCoin } from 'src/portfolio_coin/entities/portfolio_coin.entity';
 import { Transaction } from 'src/transaction/entities/transaction.entity';
-import { TransactionCoin } from 'src/transaction_coin/entities/transaction_coin.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn, ManyToOne, OneToMany, JoinTable, ManyToMany } from 'typeorm';
 
@@ -30,7 +29,4 @@ export class Portfolio {
 
   @OneToMany(() => PortfolioCoin, (portfolioCoin) => portfolioCoin.portfolio)
   portfolioCoins: PortfolioCoin[];
-
-  @OneToMany(() => TransactionCoin, (transactionCoin) => transactionCoin.portfolio)
-  transactionCoin: TransactionCoin[];
 }

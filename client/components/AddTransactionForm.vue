@@ -36,7 +36,6 @@ watch(() => transaction.value.symbol, () => {
 });
 
 const onTransactionSubmit = (_event: Event) => {
-  console.log(transaction);
 };
 </script>
 

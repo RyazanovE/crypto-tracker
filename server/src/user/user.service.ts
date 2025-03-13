@@ -10,7 +10,8 @@ export class UserService {
   constructor(@InjectRepository(User) private userRepo: Repository<User>) {}
 
   async create(dto: CreateUserDtoType) {
-    return await this.userRepo.save(dto);
+    const userWithHashedPassword = await this.userRepo.create(dto);
+    return await this.userRepo.save(userWithHashedPassword);
   }
 
   async findOne(id: number) {
@@ -20,6 +21,10 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
     return user;
+  }
+
+  async findByEmail(email: string) {
+    return await this.userRepo.findOne({ where: { email } });
   }
 
   async findAll() {
