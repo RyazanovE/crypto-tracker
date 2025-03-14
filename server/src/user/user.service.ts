@@ -14,8 +14,12 @@ export class UserService {
     return await this.userRepo.save(userWithHashedPassword);
   }
 
-  async findOne(id: number) {
-    const user = await this.userRepo.findOne({ where: { id } });
+  async updateHashedRefreshToken(userId: number, hashedRefreshToken?: string) {
+    return await this.userRepo.update({ id: userId }, { hashedRefreshToken });
+  }
+
+  async findOne(id: number, withRefreshToken?: boolean) {
+    const user = await this.userRepo.findOne({ where: { id },  select: withRefreshToken ? ['email', 'hashedRefreshToken'] : ['email'] });
 
     if (!user) {
       throw new NotFoundException('User not found');
