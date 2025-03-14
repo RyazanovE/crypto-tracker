@@ -9,6 +9,7 @@ export const UserFactory = setSeederFactory(User, (faker: Faker) => {
   user.password = faker.internet.password();
   user.createdAt = faker.date.past();
   user.updatedAt = faker.date.recent();
+  user.hashedRefreshToken = undefined;
 
   return user;
 });

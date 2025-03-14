@@ -7,14 +7,17 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Req,
+  UseGuards,
   UsePipes,
 } from '@nestjs/common';
 import { CreateUserDtoType, CreateUserSchema } from './dto/create-user.dto';
 import { UserValidationPipe } from './pipes/user-validation-pipe';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 
-@Controller('users')
+@Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
 
@@ -34,13 +37,9 @@ export class UserController {
     return this.userService.delete(id);
   }
 
-  @Get()
-  finAll() {
-    return this.userService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.findOne(id);
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  getProfile(@Req() req) {
+    return this.userService.findOne(req.user.id);
   }
 }
