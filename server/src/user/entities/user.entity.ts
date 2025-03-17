@@ -1,6 +1,7 @@
 import { Portfolio } from 'src/portfolio/entities/portfolio.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, UpdateDateColumn, CreateDateColumn, BeforeInsert } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { Role } from 'src/auth/enums/role.enum';
 
 @Entity()
 export class User {
@@ -12,6 +13,13 @@ export class User {
 
   @Column()
   password: string;
+  
+  @Column({
+    type: 'enum',
+    enum: Role,
+    default: Role.USER
+  })
+  role: Role;
   
   @Column({ nullable: true })
   hashedRefreshToken?: string;
