@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Req,
+  SetMetadata,
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
@@ -16,6 +17,9 @@ import { UserValidationPipe } from './pipes/user-validation-pipe';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
+import { Role } from 'src/auth/enums/role.enum';
+import { Roles } from 'src/auth/decorators/roles.decorators';
+import { RolesGuard } from 'src/auth/guards/roles/roles.guard';
 
 @Controller('user')
 export class UserController {
@@ -32,6 +36,7 @@ export class UserController {
     return this.userService.update(id, dto);
   }
 
+  @Roles(Role.ADMIN, Role.EDITOR)
   @Delete(':id')
   delete(@Param('id', ParseIntPipe) id: number) {
     return this.userService.delete(id);

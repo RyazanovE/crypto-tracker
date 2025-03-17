@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { FindOptionsSelect, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDtoType } from './dto/create-user.dto';
@@ -19,7 +19,11 @@ export class UserService {
   }
 
   async findOne(id: number, withRefreshToken?: boolean) {
-    const user = await this.userRepo.findOne({ where: { id },  select: withRefreshToken ? ['email', 'hashedRefreshToken'] : ['email'] });
+    const selectFields: FindOptionsSelect<User> = withRefreshToken
+    ? { email: true, hashedRefreshToken: true, role: true, id: true }
+    : { email: true, role: true, id: true, };
+
+  const user = await this.userRepo.findOne({ where: { id }, select: selectFields });
 
     if (!user) {
       throw new NotFoundException('User not found');

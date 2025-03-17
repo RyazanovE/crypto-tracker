@@ -4,10 +4,14 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Inject, Injectable } from '@nestjs/common';
 import jwtConfig from '../config/jwt.config';
 import { AuthJwtPayload } from '../types/auth-jwtPayload';
+import { AuthService } from '../auth.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(@Inject(jwtConfig.KEY) private jwtConfiguration: ConfigType<typeof jwtConfig>) {
+  constructor(
+    private authService: AuthService,
+    @Inject(jwtConfig.KEY) private jwtConfiguration: ConfigType<typeof jwtConfig>
+  ) {
     if (!jwtConfiguration.secret) {
       throw new Error('JWT secret is not defined');
     }
@@ -19,6 +23,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   validate(payload: AuthJwtPayload) {
-    return { id: payload.sub }
+    const userId = payload.sub;
+
+    return this.authService.validateJwtUser(userId);
   }
 }
