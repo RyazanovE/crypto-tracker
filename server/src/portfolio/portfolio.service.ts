@@ -11,4 +11,8 @@ export class PortfolioService {
   async create(dto: CreatePortfolioDto) {
     return await this.portfolioRepo.save(dto);
   }
+
+  async getPortfolio(userId: number) {
+    return await this.portfolioRepo.findOne({ where: { user: { id: userId } } });
+  }
 }

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { mockPortfolioResponse } from '~/assets/mock';
 
+const { $api } = useNuxtApp();
+
 const isNewTransactionModalShown = ref(false);
 const coinSymbol = ref<string | null>(null);
 
@@ -22,7 +24,7 @@ const performanceChartOptions = {
   xaxis: { type: 'datetime' },
 };
 const allocationChartOptions = computed(() => ({
-  labels: data.value?.allocation.labels,
+  labels: data.value?.allocation.labels ?? [],
 }));
 
 const onAddAnotherTransaction = (item: {
@@ -48,9 +50,13 @@ const headers = [
   { title: 'Actions', key: 'actions'},
 ];
 
+onMounted(async () => {
+  const response = await $api.portfolio.get();
+});
+
 // mock request
-const { data } = await useAsyncData('portfolio', async () => {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+const { data } = await useLazyAsyncData('portfolio', async () => {
+
 
   return mockPortfolioResponse;
 });
@@ -106,19 +112,25 @@ const { data } = await useAsyncData('portfolio', async () => {
       <v-col cols="4">
         <v-card class="bg-primary fill-height">
           <v-card-title>History</v-card-title>
-          <VueApexCharts type="area" :options="historyChartOptions" :series="data?.balance_history"  />
+          <!-- <ClientOnly>
+            <ApexChart type="area" :options="historyChartOptions" :series="data?.balance_history"  />
+          </ClientOnly> -->
         </v-card>
       </v-col>
       <v-col cols="4">
         <v-card class="bg-primary fill-height">
           <v-card-title>Performance (cumulative)</v-card-title>
-          <VueApexCharts type="line" :options="performanceChartOptions" :series="data?.performance"  />
+          <!-- <ClientOnly>
+            <ApexChart type="line" :options="performanceChartOptions" :series="data?.performance"  />
+          </ClientOnly> -->
         </v-card>
       </v-col>
       <v-col cols="4">
         <v-card class="bg-primary fill-height">
           <v-card-title>Allocation</v-card-title>
-          <VueApexCharts type='donut' :options="allocationChartOptions" :labels='data?.allocation.labels' :series="data?.allocation.series"  />
+          <!-- <ClientOnly>
+            <ApexChart type='donut' :options="allocationChartOptions" :labels='data?.allocation.labels' :series="data?.allocation.series"  />
+          </ClientOnly> -->
         </v-card>
       </v-col>
     </v-row>

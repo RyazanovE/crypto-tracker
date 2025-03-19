@@ -7,6 +7,7 @@ import { ConfigType } from '@nestjs/config';
 import * as argon2 from 'argon2'
 import { UserService } from 'src/user/user.service';
 import { CurrentUser } from './types/current-user';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -37,6 +38,26 @@ export class AuthService {
       accessToken,
       refreshToken
     })
+  }
+
+  setAuthCookies(res: Response, accessToken: string, refreshToken: string) {
+    res.cookie('access_token', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
+
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      path: '/auth/refresh',
+      sameSite: 'strict',
+    });
+  }
+
+  clearCookies(res: Response) {
+    res.clearCookie('access_token');
+    res.clearCookie('refresh_token');
   }
 
   async generateTokens(userId: number) {

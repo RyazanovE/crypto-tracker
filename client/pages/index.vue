@@ -15,22 +15,25 @@ const headers = [
   { title: 'Price (USD)', key: 'price' },
 ];
 
-const { data: items } = await useLazyAsyncData('coins', async () => {
-  try {
-    const BINANCE_PRICE_URL = 'https://api.binance.com/api/v3/ticker/price';
+const { data: items } = useLazyAsyncData(
+  'coins',
+  async () => {
+    try {
+      const BINANCE_PRICE_URL = 'https://api.binance.com/api/v3/ticker/price';
+      const result = await $fetch<{ symbol: string; price: string }[]>(BINANCE_PRICE_URL);
 
-    const result = await $fetch<{ symbol: string; price: string }[]>(BINANCE_PRICE_URL);
-    return result
-      .filter((coin) => coin.symbol.endsWith('USDT'))
-      .map((coin) => ({
-        ...coin,
-        price: Math.round(parseFloat(coin.price)),
-      }));
-  } catch (err) {
-    console.error('Ошибка загрузки данных:', err);
-    return [];
-  }
-});
+      return result
+        .filter((coin) => coin.symbol.endsWith('USDT'))
+        .map((coin) => ({
+          ...coin,
+          price: Math.round(parseFloat(coin.price)),
+        }));
+    } catch (err) {
+      console.error('Ошибка загрузки данных:', err);
+      return [];
+    }
+  },
+);
 
 
 const goToItemPage = (_event: Event, { index }: { columns: unknown; index: number }) => {

@@ -1,18 +1,23 @@
 <script setup>
 import { ref } from 'vue';
+import { useAuthStore } from '~/stores/useAuthStore';
 
 definePageMeta({
   layout: false,
 });
 
+const { $api } = useNuxtApp();
+const authStore = useAuthStore();
+
 const email = ref('');
 const password = ref('');
 const visible = ref(false);
 
-const login = () => {
-  if (email.value && password.value) {
-    console.log('Logging in with:', email.value, password.value);
-  }
+
+const login = async () => {
+  const response = await $api.auth.login({email: email.value, password: password.value});
+
+  authStore.login();
 };
 </script>
 

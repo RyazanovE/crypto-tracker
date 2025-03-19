@@ -2,16 +2,18 @@ import { defineStore } from 'pinia';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    isLoggedIn: useCookie('isLoggedIn', { default: () => 'false' }).value === 'true',
+    isLoggedIn: useCookie('isLoggedIn', { default: () => false }).value === true,
   }),
   actions: {
     login() {
       this.isLoggedIn = true;
-      useCookie('isLoggedIn').value = 'true';
+      useCookie('isLoggedIn', { default: () => false }).value = true;
+      navigateTo('/');
     },
     logout() {
       this.isLoggedIn = false;
-      useCookie('isLoggedIn').value = 'false';
+      useCookie('isLoggedIn', { default: () => false }).value = false;
+      navigateTo('/login');
     },
   },
 });
