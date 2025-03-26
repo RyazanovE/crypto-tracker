@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import { useBinancePrices } from '~/composables/useBinancePrices/useBinancePrices';
+import type { TransactionPayload } from '~/repository/modules/transaction';
 
-const transaction = defineModel<{
-  symbol: string;
-  type: number;
-  price: number;
-  quantity: number;
-  date: string;
-  totalSpent: number;
-}>({ required: true });
+const { $api } = useNuxtApp();
+const emits = defineEmits(['transactionAdded']);
+
+const transaction = defineModel<Omit<TransactionPayload, "type"> & { type: number }>({ required: true });
 
 const { data: coins } = useBinancePrices({
   afterFetch: () => updateTransactionPrice(),
@@ -26,16 +23,26 @@ watch(() => transaction.value.symbol, () => {
 
   Object.assign(transaction.value, {
     price: 0,
-    quantity: 0,
+    amount: 0,
     totalSpent: 0,
-    date: new Date().toISOString().split('T')[0],
+    date: new Date().toISOString(),
     type: 0,
   });
 
   updateTransactionPrice();
 });
 
-const onTransactionSubmit = (_event: Event) => {
+const onTransactionSubmit = async (_event: Event) => {
+  const payload = {
+    type: transaction.value.type === 0 ? 'buy' : 'sell',
+    symbol: transaction.value.symbol.toUpperCase().replace('USDT', ''),
+    amount: Number(transaction.value.amount),
+    price: Number(transaction.value.price),
+    totalSpent: Number(transaction.value.totalSpent),
+    date: new Date(transaction.value.date).toISOString(),
+  };
+  await $api.transaction.addTransaction(payload);
+  emits('transactionAdded');
 };
 </script>
 
@@ -49,9 +56,6 @@ const onTransactionSubmit = (_event: Event) => {
       <v-btn>
         Sell
       </v-btn>
-      <v-btn>
-        Transfer
-      </v-btn>
     </v-btn-toggle>
     <v-autocomplete
       v-model='transaction.symbol'
@@ -64,7 +68,7 @@ const onTransactionSubmit = (_event: Event) => {
       <v-col cols="6" class='pt-0 pb-0'>
         <v-label>Quantity</v-label>
         <v-text-field
-          v-model='transaction.quantity'
+          v-model='transaction.amount'
           density="compact"
           label="0.00"
           hide-details

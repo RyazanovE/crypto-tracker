@@ -2,8 +2,8 @@
 const route = useRoute();
 
 const LINKS = [
-  {text: 'prices', link: '/'},
-  {text: 'portfolio', link: '/portfolio'},
+  {text: 'portfolio', link: '/'},
+  {text: 'prices', link: '/prices'},
 ];
 
 const navigate = (link: string) => {

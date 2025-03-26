@@ -31,7 +31,10 @@ class AuthModule extends FetchFactory<User[]> {
       `${this.RESOURCE}/login`,
       payload,
       fetchOptions,
-    );
+    ).catch((error: { data: unknown, status: number}) => {
+      console.error(error);
+      return error?.data ?? { error, isError: true };
+    });
   }
 }
 

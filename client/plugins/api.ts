@@ -2,6 +2,7 @@ import type { FetchOptions } from 'ofetch';
 import { $fetch } from 'ofetch';
 import AuthModule from '~/repository/modules/auth';
 import PortfolioModule from '~/repository/modules/portfolio';
+import TransactionModule from '~/repository/modules/transaction';
 
 export default defineNuxtPlugin((_nuxtApp) => {
   const fetchOptions: FetchOptions = {
@@ -14,6 +15,7 @@ export default defineNuxtPlugin((_nuxtApp) => {
   const modules = {
     auth: new AuthModule(apiFetcher),
     portfolio: new PortfolioModule(apiFetcher),
+    transaction: new TransactionModule(apiFetcher),
   };
 
   return {

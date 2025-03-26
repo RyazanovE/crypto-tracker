@@ -30,7 +30,7 @@ class FetchFactory<T> {
       retry: 0,
     }).catch((error: { data: unknown, status: number}) => {
       console.error(error);
-      return error?.data ?? error;
+      return error?.data ?? {error, isError: true };
     });
     if (response?.statusCode === 401) {
       if (url.includes('login')) {

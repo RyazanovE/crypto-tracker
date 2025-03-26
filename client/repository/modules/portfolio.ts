@@ -1,17 +1,32 @@
 import type { FetchOptions } from 'ofetch';
 import FetchFactory from '../factory';
 
-type Portfolio = {
+export type Portfolio = {
   id: number,
   name: string;
+  balance: number;
+  allTimeProfit: number;
+  bestPerformerCoinId: number;
+  worstPerformerCoinId: number;
   description: string;
   createdAt: string;
   updatedAt: string;
-  transactions: any[];
-  portfolioCoins: any[];
+  coins: Coin[];
 }
 
-class PortfolioModule extends FetchFactory<Portfolio[]> {
+export interface Coin {
+  id: number;
+  name: string;
+  symbol: string;
+  amount: number;
+  averagePrice: number;
+  usdtEquivalent: string;
+  priceChange?: string;
+  currentPrice?: string;
+  profitLoss?: string;
+}
+
+class PortfolioModule extends FetchFactory<Portfolio> {
   private RESOURCE = '/portfolio';
 
   /**
@@ -19,8 +34,7 @@ class PortfolioModule extends FetchFactory<Portfolio[]> {
    * @param asyncDataOptions options for `useAsyncData`
    * @returns
    */
-  async get(
-  ) {
+  async getPortfolio() {
     const fetchOptions: FetchOptions<'json'> = {
       headers: {
         'Accept-Language': 'en-US',
@@ -30,6 +44,20 @@ class PortfolioModule extends FetchFactory<Portfolio[]> {
       'GET',
       this.RESOURCE,
       undefined,
+      fetchOptions,
+    );
+  }
+
+  async removePortfolioCoin(id: number) {
+    const fetchOptions: FetchOptions<'json'> = {
+      headers: {
+        'Accept-Language': 'en-US',
+      },
+    };
+    return this.call(
+      'POST',
+      `${this.RESOURCE}/remove-coin`,
+      { id },
       fetchOptions,
     );
   }

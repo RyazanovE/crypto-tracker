@@ -2,16 +2,18 @@
 import { useBinancePrices } from '~/composables/useBinancePrices/useBinancePrices';
 import AddTransactionForm from './AddTransactionForm.vue';
 
+const emits = defineEmits(['transactionAdded']);
+
 const props = defineProps<{ coinSymbol?: string | null }>();
 const isShown = defineModel<boolean>();
 
 const coinSearchQuery = ref<string>('');
 const transaction = reactive({
   symbol: '',
-  type: 0, // 0 - buy, 1 - sell, 2 - transfer
+  type: 0, // 0 - buy, 1 - sell
   price: 0,
-  quantity: 0,
-  date: new Date().toISOString().split('T')[0],
+  amount: 0,
+  date: new Date().toISOString(),
   totalSpent: 0,
 });
 
@@ -30,6 +32,11 @@ const onCoinSearchQueryInput = (event: Event) => {
   searchCoinTimeout = setTimeout(() => {
     coinSearchQuery.value = (event.target as HTMLInputElement).value;
   }, 500);
+};
+
+const onTransactionAdded = () => {
+  emits('transactionAdded');
+  isShown.value = false;
 };
 
 watch(() => isShown.value, () => {
@@ -67,7 +74,7 @@ watch(() => isShown.value, () => {
         </v-card-text>
 
         <v-card-text v-else>
-          <AddTransactionForm v-model='transaction'/>
+          <AddTransactionForm v-model='transaction' @transaction-added='onTransactionAdded'/>
         </v-card-text>
 
         <v-btn
