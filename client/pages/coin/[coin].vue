@@ -10,12 +10,12 @@ const day = useCrypto(route.params.coin as string, '1d');
     <v-row>
       <v-col cols="6">
         <ClientOnly>
-          <VueApexCharts type="candlestick" :options="minute.chartOptions" :series="minute.series.value"  />
+          <ApexChart type="candlestick" :options="minute.chartOptions" :series="minute.series.value"  />
         </ClientOnly>
       </v-col>
       <v-col cols="6">
         <ClientOnly>
-          <VueApexCharts type="candlestick" :options="day.chartOptions" :series="day.series.value"  />
+          <ApexChart type="candlestick" :options="day.chartOptions" :series="day.series.value"  />
         </ClientOnly>
       </v-col>
     </v-row>

@@ -13,6 +13,9 @@ export class Portfolio {
 
   @Column({ nullable: true })
   description: string;
+  
+  @Column({ type: 'decimal', precision: 5, scale: 4, default: 0, nullable: true })
+  balance: number;
 
   @CreateDateColumn()
   createdAt: Date;

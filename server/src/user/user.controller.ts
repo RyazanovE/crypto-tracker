@@ -20,11 +20,13 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 import { Role } from 'src/auth/enums/role.enum';
 import { Roles } from 'src/auth/decorators/roles.decorators';
 import { RolesGuard } from 'src/auth/guards/roles/roles.guard';
+import { Public } from 'src/auth/decorators/public.decorator';
 
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
 
+  @Public()
   @Post()
   @UsePipes(new UserValidationPipe(CreateUserSchema))
   create(@Body() dto: CreateUserDtoType) {
@@ -42,7 +44,6 @@ export class UserController {
     return this.userService.delete(id);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@Req() req) {
     return this.userService.findOne(req.user.id);

@@ -1,17 +1,27 @@
 <script setup>
 import { ref } from 'vue';
+import { useAuthStore } from '~/stores/useAuthStore';
 
 definePageMeta({
   layout: false,
 });
 
+const { $api } = useNuxtApp();
+const authStore = useAuthStore();
+
 const email = ref('');
 const password = ref('');
 const visible = ref(false);
+const error = ref('');
 
-const login = () => {
-  if (email.value && password.value) {
-    console.log('Logging in with:', email.value, password.value);
+
+const login = async () => {
+  const response = await $api.auth.login({email: email.value, password: password.value});
+
+  if (response.isError) {
+    error.value = response.error.message;
+  } else {
+    authStore.login();
   }
 };
 </script>
@@ -40,11 +50,17 @@ const login = () => {
               density="compact" placeholder="Enter your password" prepend-inner-icon="mdi-lock-outline"
               variant="outlined" clearable @click:append-inner="visible = !visible" />
 
-            <v-card class="mb-12" color="surface-variant" variant="tonal">
+            <v-card class="mb-6" color="surface-variant" variant="tonal">
               <v-card-text class="text-medium-emphasis text-caption">
                 Warning: After 3 consecutive failed login attempts, you account will
                 be temporarily locked for three hours. If you must login now, you can
                 also click "Forgot login password?" below to reset the login password.
+              </v-card-text>
+            </v-card>
+
+            <v-card v-if='error' class="mb-6" color="red" variant="tonal">
+              <v-card-text class="text-medium-emphasis text-caption">
+                {{ error }}
               </v-card-text>
             </v-card>
 

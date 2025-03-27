@@ -15,10 +15,10 @@ export class Transaction {
   @Column({ type: 'enum', enum: TransactionType})
   type: TransactionType;
 
-  @Column('numeric', { precision: 20, scale: 8})
+  @Column('numeric', { precision: 20, scale: 4})
   amount: number;
 
-  @Column('numeric', { precision: 20, scale: 8})
+  @Column('numeric', { precision: 20, scale: 4})
   price: number;
 
   @CreateDateColumn()

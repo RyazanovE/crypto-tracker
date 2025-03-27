@@ -13,9 +13,9 @@ export class PortfolioCoin {
   @ManyToOne(() => Coin, (coin) => coin.portfolioCoins, { onDelete: 'CASCADE' })
   coin: Coin;
 
-  @Column('numeric', { precision: 20, scale: 8, default: 0 })
+  @Column('numeric', { precision: 20, scale: 4, default: 0 })
   amount: number;
 
-  @Column('numeric', { precision: 20, scale: 8, default: 0 })
+  @Column('numeric', { precision: 20, scale: 4, default: 0 })
   averagePrice: number;
 }

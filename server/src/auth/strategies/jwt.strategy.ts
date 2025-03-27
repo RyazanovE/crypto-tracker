@@ -5,6 +5,16 @@ import { Inject, Injectable } from '@nestjs/common';
 import jwtConfig from '../config/jwt.config';
 import { AuthJwtPayload } from '../types/auth-jwtPayload';
 import { AuthService } from '../auth.service';
+import { Request } from 'express';
+
+const accessTokenExtractor = (req: Request): string | null => {
+  const accessToken = req.headers.cookie
+    ?.split("; ")
+    .find(row => row.startsWith("access_token="))
+    ?.split("=")[1];
+
+  return accessToken || null;
+};
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -15,12 +25,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!jwtConfiguration.secret) {
       throw new Error('JWT secret is not defined');
     }
-
     super({ 
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([accessTokenExtractor]),
       secretOrKey: jwtConfiguration.secret,
     });
   }
+  
 
   validate(payload: AuthJwtPayload) {
     const userId = payload.sub;

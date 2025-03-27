@@ -1,62 +1,69 @@
 <script setup lang="ts">
+import CoinsTable from '~/components/CoinsTable.vue';
+import type { Coin, Portfolio } from '~/repository/modules/portfolio';
+
 useHeadSafe({
-  title: 'Криптовалюты – Актуальные курсы и динамика цен',
+  title: 'Portfolio',
   meta: [
     {
       name: 'description',
       content:
-        'Следите за актуальными курсами криптовалют: Bitcoin, Ethereum, Solana и других. Данные обновляются в реальном времени.',
+        'My portfolio',
     },
   ],
 });
 
-const headers = [
-  { title: 'Coin', key: 'symbol' },
-  { title: 'Price (USD)', key: 'price' },
-];
+const { $api } = useNuxtApp();
 
-const { data: items } = await useLazyAsyncData('coins', async () => {
-  try {
-    const BINANCE_PRICE_URL = 'https://api.binance.com/api/v3/ticker/price';
+const portfolio = ref<Portfolio | null>(null);
+const isNewTransactionModalShown = ref(false);
+const coinSymbol = ref<string | null>(null);
 
-    const result = await $fetch<{ symbol: string; price: string }[]>(BINANCE_PRICE_URL);
-    return result
-      .filter((coin) => coin.symbol.endsWith('USDT'))
-      .map((coin) => ({
-        ...coin,
-        price: Math.round(parseFloat(coin.price)),
-      }));
-  } catch (err) {
-    console.error('Ошибка загрузки данных:', err);
-    return [];
-  }
-});
-
-
-const goToItemPage = (_event: Event, { index }: { columns: unknown; index: number }) => {
-  const itemId = items.value?.[index]?.symbol;
-
-  if (itemId) {
-    navigateTo(`/coin/${itemId}`);
-  }
+const addTransaction = (coin: Coin) => {
+  coinSymbol.value = coin.symbol;
+  isNewTransactionModalShown.value = true;
 };
+
+const onAddNewTransaction = () => {
+  coinSymbol.value = null;
+  isNewTransactionModalShown.value = true;
+};
+
+
+const loadPortfolio = async () => {
+  portfolio.value = await $api.portfolio.getPortfolio();
+};
+
+onMounted(() => {
+  loadPortfolio();
+});
 </script>
 
 <template>
-    <v-container>
-    <v-card>
-      <v-divider />
-      <v-data-table
-        :headers
-        :items='items ?? []'
-        item-value="symbol"
-        @click:row='goToItemPage'
-      >
-        <template #item.price="{ item }">
-          <v-chip color="green">{{ item.price }} $</v-chip>
-        </template>
-      </v-data-table>
-    </v-card>
+  <v-container>
+    <TransactionModal
+      v-model='isNewTransactionModalShown'
+      :coin-symbol
+      @transaction-added='loadPortfolio'
+    />
+
+    <PortfolioInfo
+      :portfolio
+      @load-portfolio='loadPortfolio'
+      @add-new-transaction='onAddNewTransaction'
+    />
+
+    <CoinsTable
+      class='mt-8'
+      :portfolio
+      @load-portfolio='loadPortfolio'
+      @add-transaction='addTransaction'
+    />
+
   </v-container>
 </template>
+
+<style scoped>
+
+</style>
 

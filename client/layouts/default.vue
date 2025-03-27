@@ -2,8 +2,8 @@
 const route = useRoute();
 
 const LINKS = [
-  {text: 'prices', link: '/'},
-  {text: 'portfolio', link: '/portfolio'},
+  {text: 'portfolio', link: '/'},
+  {text: 'prices', link: '/prices'},
 ];
 
 const navigate = (link: string) => {
@@ -20,7 +20,8 @@ const navigate = (link: string) => {
           <v-btn
             v-for="({link, text}) in LINKS"
             :key="link"
-            :color="link === route.path ? 'primary' : 'white'"
+            color="white"
+            :style="{ opacity: link === route.path ? 0.5 : 1 }"
             class="mx-2"
             rounded="xl"
             variant="text"

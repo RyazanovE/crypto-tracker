@@ -2,6 +2,9 @@ import withNuxt from './.nuxt/eslint.config.mjs';
 
 export default withNuxt({
   rules: {
+    "vue/valid-v-slot": ["error", {
+      "allowModifiers": true,
+    }],
     // Правила для отступов
     indent: ['error', 2], // Используем 2 пробела для отступов
     'no-multi-spaces': 'error', // Запрещает использование нескольких пробелов
