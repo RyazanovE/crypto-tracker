@@ -13,17 +13,8 @@ export class Portfolio {
 
   @Column({ nullable: true })
   description: string;
-
-  @Column({ nullable: true })
-  bestPerformerCoinId: number;
-
-  @Column({ nullable: true })
-  worstPerformerCoinId: number;
-
-  @Column({ type: 'decimal', precision: 5, scale: 2, default: 0, nullable: true })
-  allTimeProfit: number;
   
-  @Column({ type: 'decimal', precision: 5, scale: 2, default: 0, nullable: true })
+  @Column({ type: 'decimal', precision: 5, scale: 4, default: 0, nullable: true })
   balance: number;
 
   @CreateDateColumn()

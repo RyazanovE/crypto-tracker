@@ -6,12 +6,14 @@ export type Portfolio = {
   name: string;
   balance: number;
   allTimeProfit: number;
-  bestPerformerCoinId: number;
-  worstPerformerCoinId: number;
+  bestPerformer: Coin;
+  worstPerformer: Coin;
   description: string;
   createdAt: string;
   updatedAt: string;
   coins: Coin[];
+  portfolioPofitLoss: string;
+  portfolioChange: string;
 }
 
 export interface Coin {
@@ -24,6 +26,7 @@ export interface Coin {
   priceChange?: string;
   currentPrice?: string;
   profitLoss?: string;
+  moneySpent?: string;
 }
 
 class PortfolioModule extends FetchFactory<Portfolio> {

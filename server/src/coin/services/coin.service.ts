@@ -56,24 +56,26 @@ export class CoinService {
         averagePrice: Number(portfolioCoins[0]!.averagePrice).toFixed(2), 
         amount: Number(portfolioCoins[0]!.amount).toFixed(2)
       };
-      const usdtEquivalent = (portfolioCoins[0]!.averagePrice * portfolioCoins[0]!.amount);
+      const moneySpent = (portfolioCoins[0]!.averagePrice * portfolioCoins[0]!.amount);
       const currentPrice = binanceData?.find((item) => item.symbol.replace('USDT', '') === coin.symbol)?.price;
+      const usdtEquivalent = Number(currentPrice) * Number(portfolioCoins[0]!.amount);
       let priceChange: number | undefined;
       let profitLoss: number | undefined;
 
       if (currentPrice) {
         const averageBuyingPrice = portfolioCoins[0]!.averagePrice;
         priceChange = ((Number(currentPrice) - averageBuyingPrice) / averageBuyingPrice) * 100;
-        profitLoss = usdtEquivalent * (priceChange > 0 ? priceChange + 100 : 100 - priceChange) / 100;
+        profitLoss = usdtEquivalent - moneySpent;
       }
 
       return { 
         ...portfolioCoinInfo, 
         ...coin,
+        usdtEquivalent: usdtEquivalent ? Number(usdtEquivalent)?.toFixed(2) : undefined,
         profitLoss: profitLoss ? Number(profitLoss)?.toFixed(2) : undefined,
         priceChange: priceChange ? Number(priceChange)?.toFixed(2) : undefined,
         currentPrice: currentPrice ? Number(currentPrice)?.toFixed(2) :undefined,
-        usdtEquivalent: usdtEquivalent.toFixed(2),
+        moneySpent: moneySpent.toFixed(2),
       }
     });
   }

@@ -2,10 +2,16 @@
 import { useBinancePrices } from '~/composables/useBinancePrices/useBinancePrices';
 import type { TransactionPayload } from '~/repository/modules/transaction';
 
+import { useDate } from 'vuetify';
+
+const adapter = useDate();
+
 const { $api } = useNuxtApp();
+let amountDebounceTimeout: NodeJS.Timeout | null = null;
 const emits = defineEmits(['transactionAdded']);
 
-const transaction = defineModel<Omit<TransactionPayload, "type"> & { type: number }>({ required: true });
+const transaction = defineModel<Omit<TransactionPayload, "type" | 'date'> & { type: number, date: Date }>({ required: true });
+const totalSpent = ref<string>('0');
 
 const { data: coins } = useBinancePrices({
   afterFetch: () => updateTransactionPrice(),
@@ -13,7 +19,7 @@ const { data: coins } = useBinancePrices({
 
 const updateTransactionPrice = () => {
   if (!transaction.value.symbol) return;
-  transaction.value.price = coins.value?.find(coin => coin.symbol === transaction.value.symbol.toUpperCase())?.price ?? 0;
+  transaction.value.price = coins.value?.find(coin => coin.symbol.replace('USDT', '') === transaction.value.symbol.replace('USDT', '').toUpperCase())?.price ?? 0;
 };
 
 const coinSymbols = computed(() => coins.value?.map(coin => coin.symbol) ?? []);
@@ -24,12 +30,20 @@ watch(() => transaction.value.symbol, () => {
   Object.assign(transaction.value, {
     price: 0,
     amount: 0,
-    totalSpent: 0,
-    date: new Date().toISOString(),
+    date: new Date(),
     type: 0,
   });
 
   updateTransactionPrice();
+});
+
+onMounted(() => {
+  Object.assign(transaction.value, {
+    price: 0,
+    amount: 0,
+    date: new Date(),
+    type: 0,
+  });
 });
 
 const onTransactionSubmit = async (_event: Event) => {
@@ -44,16 +58,31 @@ const onTransactionSubmit = async (_event: Event) => {
   await $api.transaction.addTransaction(payload);
   emits('transactionAdded');
 };
+
+watch(() => transaction.value.amount, () => {
+  if (amountDebounceTimeout) {
+    clearTimeout(amountDebounceTimeout);
+  }
+  if (transaction.value.amount) {
+    amountDebounceTimeout = setTimeout(() => {
+      totalSpent.value = (Number(transaction.value.price ?? 0) * Number(transaction.value.amount ?? 0)).toFixed(2);
+    }, 500);
+  }
+});
+
+function format (date: Date) {
+  return adapter.toISO(date);
+}
 </script>
 
 
 <template>
   <v-form @submit.prevent='onTransactionSubmit'>
     <v-btn-toggle v-model="transaction.type" class='mb-4'>
-      <v-btn >
+      <v-btn color='green'>
         Buy
       </v-btn>
-      <v-btn>
+      <v-btn color='red' >
         Sell
       </v-btn>
     </v-btn-toggle>
@@ -86,21 +115,15 @@ const onTransactionSubmit = async (_event: Event) => {
         />
       </v-col>
     </v-row>
-    <v-text-field
-      v-model='transaction.date'
-      class='mb-4'
-      density="compact"
-      type="date"
-      hide-details
+    <v-date-input
+      v-model="transaction.date"
+      :display-format="format"
+      max-width="368"
     />
     <v-label>Total Spent</v-label>
-    <v-text-field
-      v-model='transaction.totalSpent'
-      prefix="$"
-      class='mb-4'
-      density="compact"
-      hide-details
-    />
+    <v-container>
+      {{ totalSpent }}
+    </v-container>
     <v-btn class='w-100' color='primary' type='submit'>
       add transaction
     </v-btn>

@@ -22,8 +22,13 @@ export class TransactionService {
   async findAll(paginationDto?: PaginationDto) {
     return await this.transactionRepo.find(paginationDto ? {
       skip: paginationDto.skip,
-      take: paginationDto.limit ?? DEFAULT_PAGE_SIZE
-    } : undefined);
+      take: paginationDto.limit ?? DEFAULT_PAGE_SIZE,
+      relations: ['coin'],
+      order: { createdAt: 'DESC' }, 
+    } : {
+      relations: ['coin'],
+      order: { createdAt: 'DESC' }, 
+    });
   }
 
   async addTransaction(portfolioId: number, coinId: number, transaction: CreateTransactionDtoType) {

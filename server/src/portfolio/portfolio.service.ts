@@ -6,6 +6,21 @@ import { CreatePortfolioDto } from './dto/create-portfolio.dto';
 import { CoinService } from 'src/coin/services/coin.service';
 import { PortfolioCoinService } from 'src/portfolio_coin/services/portfolio_coin.service';
 import { TransactionService } from 'src/transaction/transaction.service';
+import { Coin } from 'src/coin/entities/coin.entity';
+
+export interface PortfolioCoin {
+  id:             number;
+  amount:         string;
+  averagePrice:   string;
+  name?:           string;
+  symbol:         string;
+  usdtEquivalent?: string;
+  profitLoss?:     string;
+  priceChange?:    string;
+  currentPrice?:   string;
+  moneySpent?:     string;
+}
+
 
 @Injectable()
 export class PortfolioService {
@@ -25,9 +40,22 @@ export class PortfolioService {
 
     if (portfolio?.id) {
       const coins = await this.coinService.getPortfolioCoins(portfolio.id);
-      this.coinService.getBinanceCoinsData();
+      const balance = coins.reduce((acc, coin) => acc + Number(coin.usdtEquivalent ?? 0), 0);
+      const portfolioPofitLoss = coins.reduce((acc, coin) => acc + Number(coin.profitLoss ?? 0), 0);
+      const profitLossSortedCoins = coins.sort((a, b) => Number(b.profitLoss ?? 0) - Number(a.profitLoss ?? 0))
+      const bestPerformer = profitLossSortedCoins[0];
+      const worstPerformer = profitLossSortedCoins[profitLossSortedCoins.length - 1];
+      const portfolioChange = ((balance + portfolioPofitLoss) / balance - 1) * 100;
 
-      return { ...portfolio, coins };
+      return { 
+        ...portfolio, 
+        coins, 
+        bestPerformer,
+        worstPerformer,
+        balance: balance.toFixed(2), 
+        portfolioChange: portfolioChange.toFixed(2),
+        portfolioPofitLoss: portfolioPofitLoss.toFixed(2) 
+      };
     }
   }
 

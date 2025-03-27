@@ -2,8 +2,8 @@ import type { $Fetch, FetchOptions } from 'ofetch';
 
 class FetchFactory<T> {
   private $fetch: $Fetch;
-  private isRefreshing = false;
-  private refreshTokenPromise: Promise<void> | null = null;
+  private static isRefreshing = false;
+  private static refreshTokenPromise: Promise<void> | null = null;
 
   constructor(fetcher: $Fetch) {
     this.$fetch = fetcher;
@@ -49,12 +49,12 @@ class FetchFactory<T> {
     data?: object,
     fetchOptions?: FetchOptions<'json'>,
   ): Promise<T> {
-    if (!this.isRefreshing) {
-      this.isRefreshing = true;
-      this.refreshTokenPromise = this.refreshToken();
+    if (!FetchFactory.isRefreshing) {
+      FetchFactory.isRefreshing = true;
+      FetchFactory.refreshTokenPromise = this.refreshToken();
     }
 
-    await this.refreshTokenPromise;
+    await FetchFactory.refreshTokenPromise;
     return this.$fetch<T>(url, { method, body: data, ...fetchOptions });
   }
 
@@ -70,8 +70,8 @@ class FetchFactory<T> {
       console.error('Ошибка обновления токена:', error);
       useAuthStore().logout();
     } finally {
-      this.isRefreshing = false;
-      this.refreshTokenPromise = null;
+      FetchFactory.isRefreshing = false;
+      FetchFactory.refreshTokenPromise = null;
     }
   }
 }

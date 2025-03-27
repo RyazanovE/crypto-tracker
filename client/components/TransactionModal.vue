@@ -5,15 +5,16 @@ import AddTransactionForm from './AddTransactionForm.vue';
 const emits = defineEmits(['transactionAdded']);
 
 const props = defineProps<{ coinSymbol?: string | null }>();
-const isShown = defineModel<boolean>();
+const isShown = defineModel<boolean>({required: true});
 
+const showAlert = ref(false);
 const coinSearchQuery = ref<string>('');
 const transaction = reactive({
   symbol: '',
   type: 0, // 0 - buy, 1 - sell
   price: 0,
   amount: 0,
-  date: new Date().toISOString(),
+  date: new Date(),
   totalSpent: 0,
 });
 
@@ -36,6 +37,7 @@ const onCoinSearchQueryInput = (event: Event) => {
 
 const onTransactionAdded = () => {
   emits('transactionAdded');
+  showAlert.value = true;
   isShown.value = false;
 };
 
@@ -46,13 +48,27 @@ watch(() => isShown.value, () => {
     transaction.symbol = props.coinSymbol;
   }
 });
+
+watch(() => showAlert.value, () => {
+  if (showAlert.value) {
+    setTimeout(() => {
+      showAlert.value = false;
+    }, 3000);
+  }
+});
 </script>
 
 <template>
+  <transition name="slide-fade">
+    <v-alert v-if="showAlert" color='green' class="position-fixed notification">
+      Successfully added
+    </v-alert>
+  </transition>
   <v-dialog v-model='isShown' max-width="500">
       <v-card  :title="transaction.symbol ? 'Add Transaction' : 'Select Coin'" class="position-relative">
         <v-card-text v-if='!transaction.symbol' class='ps-10'>
           <v-text-field
+            :key='isShown as unknown as PropertyKey'
             append-inner-icon="mdi-magnify"
             density="compact"
             label="Search"
@@ -88,3 +104,27 @@ watch(() => isShown.value, () => {
       </v-card>
   </v-dialog>
 </template>
+
+<style scoped>
+.notification {
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  max-width: 300px;
+}
+
+.slide-fade-enter-active, .slide-fade-leave-active {
+  transition: all 0.3s ease-in-out;
+}
+
+.slide-fade-enter-from {
+  transform: translate(-50%, -40px);
+  opacity: 0;
+}
+
+.slide-fade-leave-to {
+  transform: translate(-50%, -40px);
+  opacity: 0;
+}
+</style>
