@@ -51,11 +51,8 @@ export class CoinService {
     const binanceData = await this.getBinanceCoinsData();
 
     return coins.map(({portfolioCoins, ...coin}) => {
-      const portfolioCoinInfo = {
-        ...portfolioCoins[0], 
-        averagePrice: Number(portfolioCoins[0]!.averagePrice).toFixed(2), 
-        amount: Number(portfolioCoins[0]!.amount).toFixed(2)
-      };
+      const portfolioCoinInfo = portfolioCoins[0];
+
       const moneySpent = (portfolioCoins[0]!.averagePrice * portfolioCoins[0]!.amount);
       const currentPrice = binanceData?.find((item) => item.symbol.replace('USDT', '') === coin.symbol)?.price;
       const usdtEquivalent = Number(currentPrice) * Number(portfolioCoins[0]!.amount);

@@ -52,9 +52,9 @@ export class PortfolioService {
         coins, 
         bestPerformer,
         worstPerformer,
-        balance: balance.toFixed(2), 
-        portfolioChange: portfolioChange.toFixed(2),
-        portfolioPofitLoss: portfolioPofitLoss.toFixed(2) 
+        balance: Math.round(balance), 
+        portfolioChange: Math.round(portfolioChange),
+        portfolioPofitLoss: Math.round(portfolioPofitLoss) 
       };
     }
   }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { FindOptionsSelect, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,7 +9,11 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UserService {
   constructor(@InjectRepository(User) private userRepo: Repository<User>) {}
 
+
   async create(dto: CreateUserDtoType) {
+    const user = await this.findByEmail(dto.email);
+    if (user) throw new BadRequestException('User already exists'); 
+    
     const userWithHashedPassword = await this.userRepo.create(dto);
     return await this.userRepo.save(userWithHashedPassword);
   }

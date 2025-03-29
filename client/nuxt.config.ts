@@ -7,6 +7,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       API_BASE_URL: process.env.API_BASE_URL,
+      BINANCE_API_URL: process.env.BINANCE_API_URL,
     },
   },
   compatibilityDate: '2025-01-30',

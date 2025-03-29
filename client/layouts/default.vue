@@ -1,6 +1,9 @@
 <script setup lang='ts'>
 const route = useRoute();
 
+const { $api } = useNuxtApp();
+const authStore = useAuthStore();
+
 const LINKS = [
   {text: 'portfolio', link: '/'},
   {text: 'prices', link: '/prices'},
@@ -8,6 +11,14 @@ const LINKS = [
 
 const navigate = (link: string) => {
   navigateTo(link);
+};
+
+const onProfileOptionClick = async (value: number) => {
+
+  if (value === 1) {
+    await $api.auth.logout();
+    authStore.logout();
+  }
 };
 </script>
 
@@ -31,9 +42,22 @@ const navigate = (link: string) => {
           </v-btn>
         </v-row>
         <v-spacer />
-        <v-btn icon>
-          <v-icon>mdi-account</v-icon>
-        </v-btn>
+        <v-menu>
+        <template #activator="{ props }">
+          <v-btn icon variant="text" v-bind="props">
+            <v-icon color="grey">mdi-account</v-icon>
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item
+            v-for="(menuItem, key) in [{ title: 'logout', value: 1 }]"
+            :key="key"
+            @click="onProfileOptionClick(menuItem.value)"
+          >
+            <v-list-item-title>{{ menuItem.title }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
       </v-container>
     </v-app-bar>
 

@@ -10,15 +10,15 @@ type LoginPayload = {
   password: string;
 }
 
-class AuthModule extends FetchFactory<User[]> {
-  private RESOURCE = '/auth';
+class UserModule extends FetchFactory<User[]> {
+  private RESOURCE = '/user';
 
   /**
    * Return the products as array
    * @param asyncDataOptions options for `useAsyncData`
    * @returns
    */
-  async login(
+  async create(
     payload: LoginPayload,
   ) {
     const fetchOptions: FetchOptions<'json'> = {
@@ -28,28 +28,14 @@ class AuthModule extends FetchFactory<User[]> {
     };
     return this.call(
       'POST',
-      `${this.RESOURCE}/login`,
+      `${this.RESOURCE}`,
       payload,
       fetchOptions,
     ).catch((error: { data: unknown, status: number}) => {
       console.error(error);
-      return { error, isError: true };
+      return error?.data ?? { error, isError: true };
     });
-  }
-
-  async logout() {
-    const fetchOptions: FetchOptions<'json'> = {
-      headers: {
-        'Accept-Language': 'en-US',
-      },
-    };
-    return this.call(
-      'POST',
-      `${this.RESOURCE}/signout`,
-      undefined,
-      fetchOptions,
-    );
   }
 }
 
-export default AuthModule;
+export default UserModule;

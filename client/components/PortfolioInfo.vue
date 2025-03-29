@@ -6,7 +6,7 @@ const { $api } = useNuxtApp();
 
 const props = defineProps<{ portfolio: Portfolio | null }>();
 
-const emits = defineEmits(['addNewTransaction']);
+const emits = defineEmits(['addTransactionBtnClicked']);
 
 const transactions = ref<Transaction[]>([]);
 
@@ -31,13 +31,13 @@ const chartOptions = computed(() => ({
   ],
 }));
 
-watch(() => props.portfolio?.balance, () => {
-  loadTransactions();
-});
-
 const loadTransactions = async () => {
   transactions.value = await $api.transaction.getAllTransactions();
 };
+
+watch(() => props.portfolio?.balance, () => {
+  loadTransactions();
+});
 
 onMounted(() => {
   loadTransactions();
@@ -54,11 +54,11 @@ onMounted(() => {
   <v-row v-if='portfolio' align="center" class="border-bottom hover:bg-grey-100 rounded-lg transition-all duration-300">
   <v-col cols="8" class="d-flex flex-column">
     <div class="d-flex align-center">
-      <span class="text-h4 font-weight-bold mr-3">{{ portfolio?.balance }} $</span>
+      <span class="text-h4 font-weight-bold mr-3">{{ portfolio?.balance.toLocaleString('ru-RU') }} $</span>
 
       <span class="text-h5 font-weight-bold mr-3">
         <span
-:class="{
+        :class="{
           'text-success': Number(portfolio.portfolioPofitLoss) > 0,
           'text-error': Number(portfolio.portfolioPofitLoss) < 0,
           'text-grey': Number(portfolio.portfolioPofitLoss) === 0
@@ -71,7 +71,7 @@ onMounted(() => {
 
       <span class="text-h5 font-weight-bold">
         <span
-:class="{
+        :class="{
           'text-success': Number(portfolio.portfolioChange) > 0,
           'text-error': Number(portfolio.portfolioChange) < 0,
           'text-grey': Number(portfolio.portfolioChange) === 0
@@ -90,7 +90,7 @@ onMounted(() => {
       class="w-100 text-uppercase font-weight-bold"
       text="+ Add transaction"
       variant="flat"
-      @click="emits('addNewTransaction')"
+      @click="emits('addTransactionBtnClicked')"
     />
   </v-col>
 </v-row>
