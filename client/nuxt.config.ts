@@ -7,6 +7,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       API_BASE_URL: process.env.API_BASE_URL,
+      BINANCE_API_URL: process.env.BINANCE_API_URL,
     },
   },
   compatibilityDate: '2025-01-30',
@@ -21,7 +22,7 @@ export default defineNuxtConfig({
     (_options, nuxt) => {
       nuxt.hooks.hook('vite:extendConfig', (config) => {
         // @ts-expect-error config exception
-        config.plugins.push(vuetify({ autoImport: true }));
+        config.plugins.push(vuetify({ autoImport: true}));
       });
     },
   ],

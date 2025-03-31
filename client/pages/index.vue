@@ -3,13 +3,12 @@ import CoinsTable from '~/components/CoinsTable.vue';
 import type { Coin, Portfolio } from '~/repository/modules/portfolio';
 
 useHeadSafe({
-  title: 'Portfolio',
+  title: 'Crypto Portfolio',
   meta: [
-    {
-      name: 'description',
-      content:
-        'My portfolio',
-    },
+    { name: "description", content: 'Crypto Portfolio for crypto trading and analysis.' },
+    { name: "keywords", content: "Crypto, Portfolio, Crypto Portfolio, BTC, ETH, Solana" },
+    { property: "og:title", content: "Crypto Portfolio" },
+    { property: "og:description", content: "Crypto Portfolio for crypto trading and analysis." },
   ],
 });
 
@@ -17,18 +16,17 @@ const { $api } = useNuxtApp();
 
 const portfolio = ref<Portfolio | null>(null);
 const isNewTransactionModalShown = ref(false);
-const coinSymbol = ref<string | null>(null);
+const selectedCoinSymbol = ref<string | null>(null);
 
-const addTransaction = (coin: Coin) => {
-  coinSymbol.value = coin.symbol;
+const onAddTransactionToSelectedCoin = (coin: Coin) => {
+  selectedCoinSymbol.value = coin.symbol;
   isNewTransactionModalShown.value = true;
 };
 
 const onAddNewTransaction = () => {
-  coinSymbol.value = null;
+  selectedCoinSymbol.value = null;
   isNewTransactionModalShown.value = true;
 };
-
 
 const loadPortfolio = async () => {
   portfolio.value = await $api.portfolio.getPortfolio();
@@ -43,27 +41,21 @@ onMounted(() => {
   <v-container>
     <TransactionModal
       v-model='isNewTransactionModalShown'
-      :coin-symbol
+      :coin-symbol='selectedCoinSymbol'
       @transaction-added='loadPortfolio'
     />
 
     <PortfolioInfo
       :portfolio
-      @load-portfolio='loadPortfolio'
-      @add-new-transaction='onAddNewTransaction'
+      @add-transaction-btn-clicked='onAddNewTransaction'
     />
 
     <CoinsTable
       class='mt-8'
       :portfolio
-      @load-portfolio='loadPortfolio'
-      @add-transaction='addTransaction'
+      @coin-deleted='loadPortfolio'
+      @add-transaction-btn-clicked='onAddTransactionToSelectedCoin'
     />
-
   </v-container>
 </template>
-
-<style scoped>
-
-</style>
 

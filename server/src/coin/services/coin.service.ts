@@ -9,7 +9,9 @@ export class CoinService {
 
   private lastTimeBinanceDataUpdated: Date | null = null;
 
-  private cachedBinanceData: { symbol: string; price: string }[] | null = null;
+  private cachedBinanceData: {
+      [k: string]: number;
+  } | null = null;
 
   async getOrCreateCoin(symbol: string): Promise<Coin> {
     let coin = await this.coinRepo.findOne({ where: { symbol: symbol.toUpperCase() } });
@@ -20,24 +22,28 @@ export class CoinService {
     return coin;
   }
 
-  async getBinanceCoinsData() {
+  async getBinanceCoinsMap() {
     try {
-      const BINANCE_PRICE_URL = 'https://api.binance.com/api/v3/ticker/price';
-      const result = await fetch(BINANCE_PRICE_URL);
-      const parsedData = (await result.json()).filter((item) => item.symbol.endsWith('USDT')) as { symbol: string; price: string }[];
+      const isCashed = this.lastTimeBinanceDataUpdated && this.cachedBinanceData;
 
-      if (this.lastTimeBinanceDataUpdated && this.cachedBinanceData) {
-        const timeDiff = new Date().getTime() - this.lastTimeBinanceDataUpdated.getTime();
-        const oneMinute = 60 * 60 * 1000;
+      if (isCashed) {
+        const timeDiff = new Date().getTime() - this.lastTimeBinanceDataUpdated!.getTime();
+        const oneMinute = 60 * 1000;
       
         if (timeDiff < oneMinute ) {
           return this.cachedBinanceData;
         } 
       }
+      const result = await fetch(process.env.BINANCE_PRICE_URL as string);
+      const coinsMap = Object.fromEntries(
+        (await result.json() as { symbol: string; price: string }[])
+        .filter((item) => item.symbol.endsWith('USDT'))
+        .map(({ symbol, price }) => [symbol.replace('USDT', ''), Number(price)])
+      );
       this.lastTimeBinanceDataUpdated = new Date();
-      this.cachedBinanceData = parsedData;
+      this.cachedBinanceData = coinsMap;
   
-      return parsedData;
+      return coinsMap;
     } catch (error) {
       console.error(error);
     }
@@ -48,35 +54,37 @@ export class CoinService {
       where: { portfolioCoins: { portfolio: { id: portfolioId } } },
       relations: ['portfolioCoins'],
     });
-    const binanceData = await this.getBinanceCoinsData();
+    const binanceCoinsMap = await this.getBinanceCoinsMap();
 
     return coins.map(({portfolioCoins, ...coin}) => {
-      const portfolioCoinInfo = {
-        ...portfolioCoins[0], 
-        averagePrice: Number(portfolioCoins[0]!.averagePrice).toFixed(2), 
-        amount: Number(portfolioCoins[0]!.amount).toFixed(2)
-      };
-      const moneySpent = (portfolioCoins[0]!.averagePrice * portfolioCoins[0]!.amount);
-      const currentPrice = binanceData?.find((item) => item.symbol.replace('USDT', '') === coin.symbol)?.price;
-      const usdtEquivalent = Number(currentPrice) * Number(portfolioCoins[0]!.amount);
-      let priceChange: number | undefined;
-      let profitLoss: number | undefined;
+      const portfolioCoinInfo = portfolioCoins[0];
+      const averagePrice = parseFloat(portfolioCoinInfo.averagePrice as unknown as string);
+      const amount = parseFloat(portfolioCoinInfo.amount as unknown as string)
 
-      if (currentPrice) {
-        const averageBuyingPrice = portfolioCoins[0]!.averagePrice;
-        priceChange = ((Number(currentPrice) - averageBuyingPrice) / averageBuyingPrice) * 100;
-        profitLoss = usdtEquivalent - moneySpent;
-      }
+      const moneySpent = averagePrice * amount;
+      const currentPrice = binanceCoinsMap?.[coin.symbol] ?? 0;
+      const usdtEquivalent = currentPrice * amount;
+      const priceChange = ((currentPrice - averagePrice) / averagePrice) * 100;
+      const profitLoss = usdtEquivalent - moneySpent;
 
-      return { 
+      const updatedCoin = { 
         ...portfolioCoinInfo, 
         ...coin,
-        usdtEquivalent: usdtEquivalent ? Number(usdtEquivalent)?.toFixed(2) : undefined,
-        profitLoss: profitLoss ? Number(profitLoss)?.toFixed(2) : undefined,
-        priceChange: priceChange ? Number(priceChange)?.toFixed(2) : undefined,
-        currentPrice: currentPrice ? Number(currentPrice)?.toFixed(2) :undefined,
-        moneySpent: moneySpent.toFixed(2),
+        amount,
+        averagePrice,
+        usdtEquivalent,
+        profitLoss,
+        priceChange,
+        currentPrice,
+        moneySpent
       }
+      Object.keys(updatedCoin).forEach(key => {
+        if (typeof updatedCoin[key] === "number") {
+          updatedCoin[key] = Math.round(updatedCoin[key] * 100) / 100; 
+        }
+      });
+
+      return updatedCoin
     });
   }
 }

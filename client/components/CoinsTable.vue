@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Coin, Portfolio } from '~/repository/modules/portfolio';
 
-const headers = [
+const TABLE_HEADERS = [
   { title: 'Coin', key: 'symbol' },
   { title: 'Avg Price (USDT)', key: 'averagePrice' },
   { title: 'Amount', key: 'amount' },
@@ -18,33 +18,23 @@ const { $api } = useNuxtApp();
 const showAlert = ref(false);
 
 defineProps<{ portfolio: Portfolio | null }>();
-const emits = defineEmits(['loadPortfolio', 'addTransaction']);
+const emits = defineEmits(['coinDeleted', 'addTransactionBtnClicked']);
 
 const onCoinOptionClick = async (optionValue: number, coin: Coin) => {
   if (optionValue === 1) {
     await $api.portfolio.removePortfolioCoin(coin.id);
     showAlert.value = true;
-    emits('loadPortfolio');
+    emits('coinDeleted');
   }
 };
-
-watch(() => showAlert.value, () => {
-  if (showAlert.value) {
-    setTimeout(() => {
-      showAlert.value = false;
-    }, 3000);
-  }
-});
 </script>
 
 <template>
-  <v-alert v-if="showAlert" color='green' class="position-fixed notification">
-    Successfully deleted
-  </v-alert>
+  <AlertNotification v-model="showAlert" color='green' message="Successfully deleted"/>
   <v-data-table
   class="mt-8 bg-surface"
   :loading="!portfolio"
-  :headers="headers"
+  :headers="TABLE_HEADERS"
   :items="portfolio?.coins ?? []"
   hide-default-footer
 >
@@ -54,7 +44,7 @@ watch(() => showAlert.value, () => {
 
   <template #item.actions="{ item }">
     <v-container class="d-flex align-center px-0">
-      <v-btn icon variant="text" @click="emits('addTransaction', item)">
+      <v-btn icon variant="text" @click="emits('addTransactionBtnClicked', item)">
         <v-icon color="primary">mdi-plus</v-icon>
       </v-btn>
 
@@ -82,7 +72,7 @@ watch(() => showAlert.value, () => {
       class="text-white font-weight-bold"
       :color="Number(item.priceChange ?? 1) > 0 ? 'green' : 'red'"
     >
-      {{ item.priceChange }} %
+      {{ item.priceChange?.toLocaleString() }} %
     </v-chip>
   </template>
 
@@ -91,12 +81,12 @@ watch(() => showAlert.value, () => {
       class="text-white font-weight-bold"
       :color="Number(item.profitLoss ?? 1) > 0 ? 'green' : 'red'"
     >
-      {{ item.profitLoss }} $
+      {{ item.profitLoss?.toLocaleString() }} $
     </v-chip>
   </template>
 
   <template #item.currentPrice="{ item }">
-    <span class="text-body-2 font-weight-bold">{{ item.currentPrice }} $</span>
+    <span class="text-body-2 font-weight-bold">{{ item.currentPrice?.toLocaleString() }} $</span>
   </template>
 
   <template #item.symbol="{ item }">
@@ -106,40 +96,19 @@ watch(() => showAlert.value, () => {
   </template>
 
   <template #item.usdtEquivalent="{ item }">
-    <span class="text-body-2 font-weight-bold">{{ item.usdtEquivalent }} $</span>
+    <span class="text-body-2 font-weight-bold">{{ item.usdtEquivalent.toLocaleString() }} $</span>
   </template>
 
   <template #item.averagePrice="{ item }">
-    <span class="text-body-2 font-weight-bold">{{ item.averagePrice }} $</span>
+    <span class="text-body-2 font-weight-bold">{{ item.averagePrice.toLocaleString() }} $</span>
   </template>
 
   <template #item.moneySpent="{ item }">
-    <span class="text-body-2 font-weight-bold">{{ item.moneySpent }} $</span>
+    <span class="text-body-2 font-weight-bold">{{ item.moneySpent?.toLocaleString() }} $</span>
+  </template>
+
+  <template #item.amount="{ item }">
+    <span class="text-body-2 font-weight-bold">{{ item.amount?.toLocaleString() }}</span>
   </template>
 </v-data-table>
 </template>
-
-<style scoped>
-.notification {
-  top: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-  max-width: 300px;
-}
-
-.slide-fade-enter-active,
-.slide-fade-leave-active {
-  transition: all 0.3s ease-in-out;
-}
-
-.slide-fade-enter-from {
-  transform: translate(-50%, -40px);
-  opacity: 0;
-}
-
-.slide-fade-leave-to {
-  transform: translate(-50%, -40px);
-  opacity: 0;
-}
-</style>

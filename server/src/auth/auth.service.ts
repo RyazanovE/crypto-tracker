@@ -100,7 +100,7 @@ export class AuthService {
   }
 
   async signOut(userId: number) {
-    await this.userService.updateHashedRefreshToken(userId, undefined);
+    return await this.userService.updateHashedRefreshToken(userId, undefined);
   }
 
   async validateJwtUser(userId: number) {

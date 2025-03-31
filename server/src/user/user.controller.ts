@@ -8,18 +8,14 @@ import {
   Patch,
   Post,
   Req,
-  SetMetadata,
-  UseGuards,
   UsePipes,
 } from '@nestjs/common';
 import { CreateUserDtoType, CreateUserSchema } from './dto/create-user.dto';
 import { UserValidationPipe } from './pipes/user-validation-pipe';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 import { Role } from 'src/auth/enums/role.enum';
 import { Roles } from 'src/auth/decorators/roles.decorators';
-import { RolesGuard } from 'src/auth/guards/roles/roles.guard';
 import { Public } from 'src/auth/decorators/public.decorator';
 
 @Controller('user')

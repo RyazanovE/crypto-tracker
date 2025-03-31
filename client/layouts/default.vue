@@ -1,21 +1,40 @@
 <script setup lang='ts'>
-const route = useRoute();
+import { useTheme } from 'vuetify';
 
 const LINKS = [
   {text: 'portfolio', link: '/'},
+  {text: 'transactions', link: '/transactions'},
   {text: 'prices', link: '/prices'},
 ];
+
+const route = useRoute();
+const theme = useTheme();
+
+const { $api } = useNuxtApp();
+const authStore = useAuthStore();
+
+onMounted(() => {
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  theme.global.name.value = savedTheme;
+});
 
 const navigate = (link: string) => {
   navigateTo(link);
 };
+
+const onProfileOptionClick = async (value: number) => {
+  if (value === 1) {
+    await $api.auth.logout();
+    authStore.logout();
+  }
+};
 </script>
 
 <template>
-  <v-app>
+  <v-app >
     <v-app-bar app color="primary" dark>
       <v-container class="d-flex align-center">
-        <v-app-bar-title>Crypto Portfolio</v-app-bar-title>
+        <v-app-bar-title>Crypto Tracker</v-app-bar-title>
         <v-row justify="center" no-gutters>
           <v-btn
             v-for="({link, text}) in LINKS"
@@ -31,25 +50,37 @@ const navigate = (link: string) => {
           </v-btn>
         </v-row>
         <v-spacer />
-        <v-btn icon>
-          <v-icon>mdi-account</v-icon>
-        </v-btn>
+        <ThemeToogle />
+        <v-menu>
+        <template #activator="{ props }">
+          <v-btn icon variant="text" v-bind="props">
+            <v-icon color="grey">mdi-account</v-icon>
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item
+            v-for="(menuItem, key) in [{ title: 'logout', value: 1 }]"
+            :key="key"
+            @click="onProfileOptionClick(menuItem.value)"
+          >
+            <v-list-item-title>{{ menuItem.title }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
       </v-container>
     </v-app-bar>
 
-    <v-main>
-      <v-container>
+    <v-main style='padding-top: 64px;'>
+      <v-container style="max-width: 1200px;">
         <slot />
       </v-container>
     </v-main>
 
-    <v-footer app color="primary" dark>
+    <v-footer app color="primary w-100" dark>
       <v-container class="text-center">
         &copy; {{ new Date().getFullYear() }} Crypto Tracker
       </v-container>
     </v-footer>
   </v-app>
 </template>
-
-
 

@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import { useBinancePrices } from '~/composables/useBinancePrices/useBinancePrices';
 import type { TransactionPayload } from '~/repository/modules/transaction';
-
 import { useDate } from 'vuetify';
 
 const adapter = useDate();
-
 const { $api } = useNuxtApp();
-let amountDebounceTimeout: NodeJS.Timeout | null = null;
-const emits = defineEmits(['transactionAdded']);
 
+let amountDebounceTimeout: NodeJS.Timeout | null = null;
+
+const emits = defineEmits(['transactionAdded']);
 const transaction = defineModel<Omit<TransactionPayload, "type" | 'date'> & { type: number, date: Date }>({ required: true });
-const totalSpent = ref<string>('0');
+const totalSpent = ref<number>(0);
 
 const { data: coins } = useBinancePrices({
   afterFetch: () => updateTransactionPrice(),
@@ -24,27 +23,19 @@ const updateTransactionPrice = () => {
 
 const coinSymbols = computed(() => coins.value?.map(coin => coin.symbol) ?? []);
 
-watch(() => transaction.value.symbol, () => {
-  if (!transaction.value.symbol) return;
 
+const restoreTransaction = () => {
   Object.assign(transaction.value, {
     price: 0,
     amount: 0,
     date: new Date(),
     type: 0,
   });
+};
 
-  updateTransactionPrice();
-});
-
-onMounted(() => {
-  Object.assign(transaction.value, {
-    price: 0,
-    amount: 0,
-    date: new Date(),
-    type: 0,
-  });
-});
+function formatDate(date: Date) {
+  return adapter.toISO(date);
+}
 
 const onTransactionSubmit = async (_event: Event) => {
   const payload = {
@@ -52,8 +43,8 @@ const onTransactionSubmit = async (_event: Event) => {
     symbol: transaction.value.symbol.toUpperCase().replace('USDT', ''),
     amount: Number(transaction.value.amount),
     price: Number(transaction.value.price),
-    totalSpent: Number(transaction.value.totalSpent),
-    date: new Date(transaction.value.date).toISOString(),
+    totalSpent: transaction.value.totalSpent,
+    date: formatDate(transaction.value.date),
   };
   await $api.transaction.addTransaction(payload);
   emits('transactionAdded');
@@ -65,14 +56,19 @@ watch(() => transaction.value.amount, () => {
   }
   if (transaction.value.amount) {
     amountDebounceTimeout = setTimeout(() => {
-      totalSpent.value = (Number(transaction.value.price ?? 0) * Number(transaction.value.amount ?? 0)).toFixed(2);
+      totalSpent.value = Math.round(transaction.value.price * transaction.value.amount * 100) / 100;
     }, 500);
   }
 });
 
-function format (date: Date) {
-  return adapter.toISO(date);
-}
+watch(() => transaction.value.symbol, () => {
+  restoreTransaction();
+  updateTransactionPrice();
+});
+
+onMounted(() => {
+  restoreTransaction();
+});
 </script>
 
 
@@ -117,12 +113,12 @@ function format (date: Date) {
     </v-row>
     <v-date-input
       v-model="transaction.date"
-      :display-format="format"
+      :display-format="formatDate"
       max-width="368"
     />
     <v-label>Total Spent</v-label>
     <v-container>
-      {{ totalSpent }}
+      {{ totalSpent.toLocaleString() }} $
     </v-container>
     <v-btn class='w-100' color='primary' type='submit'>
       add transaction

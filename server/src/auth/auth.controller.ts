@@ -33,9 +33,12 @@ export class AuthController {
     return res.send({ message: 'Successfully refreshed token' });
   }
   
+  @HttpCode(HttpStatus.OK)
   @Post('signout')
-  signOut(@Req() req, @Response() res) {
-    this.authService.clearCookies(res);
-    this.authService.signOut(req.user.id);
+  async signOut(@Req() req, @Response() res) {
+    await this.authService.clearCookies(res);
+    await this.authService.signOut(req.user.id);
+
+    return res.send({ message: 'Successfully signed out' });
   } 
 }

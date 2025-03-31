@@ -1,43 +1,25 @@
 <script setup lang="ts">
-useHeadSafe({
-  title: 'Криптовалюты – Актуальные курсы и динамика цен',
-  meta: [
-    {
-      name: 'description',
-      content:
-        'Следите за актуальными курсами криптовалют: Bitcoin, Ethereum, Solana и других. Данные обновляются в реальном времени.',
-    },
-  ],
-});
+import { useBinancePrices } from '~/composables/useBinancePrices/useBinancePrices';
 
-const headers = [
+const TABLE_HEADERS = [
   { title: 'Coin', key: 'symbol' },
   { title: 'Price (USD)', key: 'price' },
 ];
 
-const { data: items, status } = useLazyAsyncData(
-  'coins',
-  async () => {
-    try {
-      const BINANCE_PRICE_URL = 'https://api.binance.com/api/v3/ticker/price';
-      const result = await $fetch<{ symbol: string; price: string }[]>(BINANCE_PRICE_URL);
+useHeadSafe({
+  title: "Crypto List | Crypto Portfolio",
+  meta: [
+    { name: "description", content: "Explore a list of cryptocurrencies with real-time prices, market data, and analysis on Crypto Portfolio." },
+    { name: "keywords", content: "Crypto List, Cryptocurrency Prices, Crypto Market Data, BTC, ETH, Solana, AVAX" },
+    { property: "og:title", content: "Cryptocurrency List & Market Data" },
+    { property: "og:description", content: "Track real-time prices, trends, and market data for Bitcoin, Ethereum, Solana, and more." },
+  ],
+});
 
-      return result
-        .filter((coin) => coin.symbol.endsWith('USDT'))
-        .map((coin) => ({
-          ...coin,
-          price: Math.round(parseFloat(coin.price)),
-        }));
-    } catch (err) {
-      console.error('Ошибка загрузки данных:', err);
-      return [];
-    }
-  },
-);
-
+const { data: coins, status } = useBinancePrices();
 
 const goToItemPage = (_event: Event, { index }: { columns: unknown; index: number }) => {
-  const itemId = items.value?.[index]?.symbol;
+  const itemId = coins.value?.[index]?.symbol;
 
   if (itemId) {
     navigateTo(`/coin/${itemId}`);
@@ -46,14 +28,13 @@ const goToItemPage = (_event: Event, { index }: { columns: unknown; index: numbe
 </script>
 
 <template>
-    <v-container>
     <v-card>
       <v-divider />
       <v-data-table
         :loading='status === "pending"'
         loading-text="Loading... Please wait"
-        :headers
-        :items='items ?? []'
+        :headers='TABLE_HEADERS'
+        :items='coins ?? []'
         item-value="symbol"
         @click:row='goToItemPage'
       >
@@ -62,6 +43,5 @@ const goToItemPage = (_event: Event, { index }: { columns: unknown; index: numbe
         </template>
       </v-data-table>
     </v-card>
-  </v-container>
 </template>
 
