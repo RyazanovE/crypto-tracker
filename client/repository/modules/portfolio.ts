@@ -23,9 +23,9 @@ export interface Coin {
   amount: number;
   averagePrice: number;
   usdtEquivalent: string;
-  priceChange?: string;
+  priceChange: number;
   currentPrice?: string;
-  profitLoss?: string;
+  profitLoss: number;
   moneySpent?: string;
 }
 

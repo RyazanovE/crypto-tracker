@@ -28,7 +28,6 @@ const goToItemPage = (_event: Event, { index }: { columns: unknown; index: numbe
 </script>
 
 <template>
-    <v-container>
     <v-card>
       <v-divider />
       <v-data-table
@@ -44,6 +43,5 @@ const goToItemPage = (_event: Event, { index }: { columns: unknown; index: numbe
         </template>
       </v-data-table>
     </v-card>
-  </v-container>
 </template>
 

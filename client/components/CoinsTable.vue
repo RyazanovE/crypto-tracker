@@ -72,7 +72,7 @@ const onCoinOptionClick = async (optionValue: number, coin: Coin) => {
       class="text-white font-weight-bold"
       :color="Number(item.priceChange ?? 1) > 0 ? 'green' : 'red'"
     >
-      {{ item.priceChange }} %
+      {{ item.priceChange?.toLocaleString() }} %
     </v-chip>
   </template>
 
@@ -81,12 +81,12 @@ const onCoinOptionClick = async (optionValue: number, coin: Coin) => {
       class="text-white font-weight-bold"
       :color="Number(item.profitLoss ?? 1) > 0 ? 'green' : 'red'"
     >
-      {{ item.profitLoss }} $
+      {{ item.profitLoss?.toLocaleString() }} $
     </v-chip>
   </template>
 
   <template #item.currentPrice="{ item }">
-    <span class="text-body-2 font-weight-bold">{{ item.currentPrice }} $</span>
+    <span class="text-body-2 font-weight-bold">{{ item.currentPrice?.toLocaleString() }} $</span>
   </template>
 
   <template #item.symbol="{ item }">
@@ -96,15 +96,19 @@ const onCoinOptionClick = async (optionValue: number, coin: Coin) => {
   </template>
 
   <template #item.usdtEquivalent="{ item }">
-    <span class="text-body-2 font-weight-bold">{{ item.usdtEquivalent }} $</span>
+    <span class="text-body-2 font-weight-bold">{{ item.usdtEquivalent.toLocaleString() }} $</span>
   </template>
 
   <template #item.averagePrice="{ item }">
-    <span class="text-body-2 font-weight-bold">{{ item.averagePrice }} $</span>
+    <span class="text-body-2 font-weight-bold">{{ item.averagePrice.toLocaleString() }} $</span>
   </template>
 
   <template #item.moneySpent="{ item }">
-    <span class="text-body-2 font-weight-bold">{{ item.moneySpent }} $</span>
+    <span class="text-body-2 font-weight-bold">{{ item.moneySpent?.toLocaleString() }} $</span>
+  </template>
+
+  <template #item.amount="{ item }">
+    <span class="text-body-2 font-weight-bold">{{ item.amount?.toLocaleString() }}</span>
   </template>
 </v-data-table>
 </template>

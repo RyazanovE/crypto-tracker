@@ -1,20 +1,28 @@
 <script setup lang='ts'>
+import { useTheme } from 'vuetify';
+
+const LINKS = [
+  {text: 'portfolio', link: '/'},
+  {text: 'transactions', link: '/transactions'},
+  {text: 'prices', link: '/prices'},
+];
+
 const route = useRoute();
+const theme = useTheme();
 
 const { $api } = useNuxtApp();
 const authStore = useAuthStore();
 
-const LINKS = [
-  {text: 'portfolio', link: '/'},
-  {text: 'prices', link: '/prices'},
-];
+onMounted(() => {
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  theme.global.name.value = savedTheme;
+});
 
 const navigate = (link: string) => {
   navigateTo(link);
 };
 
 const onProfileOptionClick = async (value: number) => {
-
   if (value === 1) {
     await $api.auth.logout();
     authStore.logout();
@@ -23,10 +31,10 @@ const onProfileOptionClick = async (value: number) => {
 </script>
 
 <template>
-  <v-app>
+  <v-app >
     <v-app-bar app color="primary" dark>
       <v-container class="d-flex align-center">
-        <v-app-bar-title>Crypto Portfolio</v-app-bar-title>
+        <v-app-bar-title>Crypto Tracker</v-app-bar-title>
         <v-row justify="center" no-gutters>
           <v-btn
             v-for="({link, text}) in LINKS"
@@ -42,6 +50,7 @@ const onProfileOptionClick = async (value: number) => {
           </v-btn>
         </v-row>
         <v-spacer />
+        <ThemeToogle />
         <v-menu>
         <template #activator="{ props }">
           <v-btn icon variant="text" v-bind="props">
@@ -61,19 +70,17 @@ const onProfileOptionClick = async (value: number) => {
       </v-container>
     </v-app-bar>
 
-    <v-main>
-      <v-container>
+    <v-main style='padding-top: 64px;'>
+      <v-container style="max-width: 1200px;">
         <slot />
       </v-container>
     </v-main>
 
-    <v-footer app color="primary" dark>
+    <v-footer app color="primary w-100" dark>
       <v-container class="text-center">
         &copy; {{ new Date().getFullYear() }} Crypto Tracker
       </v-container>
     </v-footer>
   </v-app>
 </template>
-
-
 

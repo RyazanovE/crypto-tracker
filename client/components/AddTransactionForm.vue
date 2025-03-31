@@ -56,7 +56,7 @@ watch(() => transaction.value.amount, () => {
   }
   if (transaction.value.amount) {
     amountDebounceTimeout = setTimeout(() => {
-      totalSpent.value = Math.round(transaction.value.price * transaction.value.amount);
+      totalSpent.value = Math.round(transaction.value.price * transaction.value.amount * 100) / 100;
     }, 500);
   }
 });
@@ -118,7 +118,7 @@ onMounted(() => {
     />
     <v-label>Total Spent</v-label>
     <v-container>
-      {{ totalSpent }}
+      {{ totalSpent.toLocaleString() }} $
     </v-container>
     <v-btn class='w-100' color='primary' type='submit'>
       add transaction
